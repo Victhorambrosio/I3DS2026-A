@@ -1,15 +1,19 @@
-import { useEffect, useState } from "react"; // useState - Ele controla o estado do item |
+import { useContext, useEffect, useState } from "react"; // useState - Ele controla o estado do item |
 import "./App.css";
 
-import logo from "./assets/devflix.png";
-import lupa from "./assets/search.svg";
+import logo from "./assets/JORGINFLIX.png";
+import lupa from "./assets/search.png";
 
 import Rodape from "./components/Rodape/Rodape";
 import MovieCard from "./components/MovieCard/MovieCard";
+import { LanguageProvider } from "./context/LanguageContext";
+import { LanguageContext } from "./context/LanguageContext";
 
-const App = () => {
+const AppContent = () => {
   const [movies, setMovies] = useState([]);
   const [search, setSearch] = useState("");
+  const [theme, setTheme] = useState("dark");
+  const { language, toggleLanguage } = useContext(LanguageContext);
 
   //Utilizando uma CHAVE de API do arquivo .env
   const apiKey = import.meta.env.VITE_OMDB_API_KEY;
@@ -26,12 +30,60 @@ const App = () => {
 
   useEffect(() => {
     (async () => {
-      await searchMovies("Hulk"); // termo para pesquina ao carregar o site
+      await searchMovies("spider-man"); // termo para pesquina ao carregar o site
     })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    document.body.className = theme;
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(theme === "dark" ? "light" : "dark");
+  };
+
   return (
-    <div id="App">
+    <div id="App" className={theme}>
+      <button
+        onClick={toggleLanguage}
+        style={{
+          position: "fixed",
+          top: "20px",
+          right: "90px",
+          padding: "10px 12px",
+          backgroundColor: "#3662f3",
+          color: "#fff",
+          border: "none",
+          borderRadius: "8px",
+          cursor: "pointer",
+          fontSize: "14px",
+          fontWeight: "700",
+          zIndex: 1000,
+        }}
+      >
+        {language === "pt-br" ? "EN" : "PT"}
+      </button>
+      <button
+        onClick={toggleTheme}
+        style={{
+          position: "fixed",
+          top: "20px",
+          right: "20px",
+          padding: "10px 12px",
+
+          backgroundColor: theme === "dark" ? "#3662f3" : " #072e52",
+          color: "#fff",
+          border: "none",
+          borderRadius: "8px",
+          cursor: "pointer",
+          fontSize: "14px",
+          fontWeight: "700",
+          zIndex: 1000,
+        }}
+      >
+        {theme === "dark" ? "☀️" : "🌙"}
+      </button>
       <img
         id="Logo"
         src={logo}
@@ -43,7 +95,9 @@ const App = () => {
           onKeyDown={(e) => e.key === "Enter" && searchMovies(search)}
           onChange={(e) => setSearch(e.target.value)}
           type="text"
-          placeholder="Pesquise por filmes"
+          placeholder={
+            language === "pt-br" ? "Pesquise por filmes" : "Search for movies"
+          }
         />
         <img
           onClick={() => searchMovies(search)}
@@ -66,6 +120,14 @@ const App = () => {
         Victhor Ambrósio
       </Rodape>
     </div>
+  );
+};
+
+const App = () => {
+  return (
+    <LanguageProvider>
+      <AppContent />
+    </LanguageProvider>
   );
 };
 
